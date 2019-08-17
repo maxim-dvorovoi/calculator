@@ -1,13 +1,13 @@
 <template>
   <div id="app">
     <div class="calculator">
-      <div class="results">
-        <div :class="'action ' + (view ? 'show' : '')">
-          {{ view }}
+      <div class="results" ref="results">
+        <div :class="'action ' + (expression ? 'show' : '')">
+          {{ expression }}
         </div>
-        {{ this.round(result) || this.round(number2) || this.round(number1) }}
+        {{ enter }}
       </div>
-      <div class="symbols">
+      <div class="symbols" ref="symbols">
         <div class="row">
           <div @click="setCurrentAction('√')">√</div>
           <div @click="setCurrentAction('+/-')">+/-</div>
@@ -56,32 +56,25 @@ export default {
     };
   },
   computed: {
-    view() {
+    expression() {
       if (!this.action) return;
       return this.round(this.number1) + ' ' + this.action;
+    },
+    enter() {
+      let res = this.result || this.number2 || this.number1 || 0;
+      let lastSymbol = res.toString().slice(-1);
+      res = lastSymbol === '.' || lastSymbol === '0' ? res : this.round(res);
+
+      return res;
     }
   },
   methods: {
     round(exp) {
-      return Math.round(exp*1000000000)/1000000000;
+      return Math.round(exp*10000000)/10000000;
     },
-    setAction(action) {
+    async setAction(action) {
       if (this.number2) {
-        if (this.action === '+') {
-          this.number1 = +this.number1 + +this.number2;
-        } else if (this.action === '-') {
-          this.number1 = this.number1 - this.number2;
-        } else if (this.action === '*') {
-          this.number1 = this.number1 * this.number2;
-        } else if (this.action === '/') {
-          if (this.number2 == '0') {
-            this.number1 = 0;
-          } else {
-            this.number1 = this.number1 / this.number2;
-          }
-
-        }
-
+        await this.setMathAction(this.action);
         this.number2 = 0;
       }
 
@@ -94,40 +87,35 @@ export default {
       this.action = action;
     },
     setCurrentAction(action) {
-      if (action === '√') {
-        if (this.result) return this.result = Math.sqrt(this.result);
-        if (this.number2) return this.number2 = Math.sqrt(this.number2);
-        if (this.number1) return this.number1 = Math.sqrt(this.number1);
-      } else if (action === '+/-') {
-        if (this.result) return this.result = -this.result;
-        if (this.number2) return this.number2 = -this.number2;
-        if (this.number1) return this.number1 = -this.number1;
-      } else if (action === '%') {
-        if (this.result) return this.result = this.result / 100;
-        if (this.number2) return this.number2 = this.number2 / 100;
-        if (this.number1) return this.number1 = this.number1 / 100;
-      }
-    },
-    setNumber(num) {
-      if (!this.action) {
-        if (this.result) {
-          if (num === '.') return this.number1 += num;
-          this.number1 = num;
-          this.result = 0;
-          return;
-        }
-
-        if (this.number1.length > 10) return;
-        if (num === '.') return this.number1 += num;
-        this.number1 = this.number1 === 0 ? num : this.number1 + num;
+      if (this.result) {
+        this.result = this.setMathAction(action, this.result);
+        this.number1 = this.result;
         return;
       }
+      if (this.number2) return this.number2 = this.setMathAction(action, this.number2);
+      if (this.number1) return this.number1 = this.setMathAction(action, this.number1);
+    },
+    setNumber(num) {
+      let isDot = num === '.';
+
+      if (this.action) this.result = 0;
+      if (!isDot && this.result) this.number1 = 0;
+      if (isDot && this.isHasDot(this.result)) return;
 
       this.result = 0;
-      if (this.number2.length > 10) return;
-      if (num === '.') return this.number2 += num;
+      let variable = 'number' + (this.action ? 2 : 1);
 
-      this.number2 = this.number2 === 0 ? num : this.number2 + num;
+      if (this[variable].length > 8) return;
+      if (isDot && this.isHasDot(this[variable])) return;
+      if (this[variable] === '0' && num === '0') return;
+      if (this[variable] == 0 && !isDot && !this.isHasDot(this[variable])) {
+        this[variable] = num;
+      } else {
+        this[variable] += num
+      }
+    },
+    isHasDot(variable) {
+      return variable.toString().match(/\./);
     },
     reset() {
       this.action = null;
@@ -135,14 +123,50 @@ export default {
       this.number2 = 0;
       this.result = 0;
     },
+    setMathAction(action, res = 0) {
+      if (action === '√') {
+        return Math.sqrt(res);
+      } else if (action === '+/-') {
+        return -res;
+      } else if (action === '%') {
+        return res / 100;
+      } else if (action === '+') {
+        return this.number1 = +this.number1 + +this.number2;
+      } else if (action === '-') {
+        return this.number1 = this.number1 - this.number2;
+      } else if (action === '*') {
+        return this.number1 = this.number1 * this.number2;
+      } else if (action === '/') {
+        return this.number1 = !+this.number2 ? 0 : (this.number1 / this.number2);
+      }
+    },
     keyPress(e) {
       let action = e.key === 'Enter' ? '=' : e.key;
       if (!isNaN(+action) || action === '.') this.setNumber(action);
       if (this.actionMap.indexOf(action) !== -1) this.setAction(action);
+    },
+    onResize() {
+      if (window.innerWidth > 500) {
+        if (!this.$refs.symbols.childNodes[0].childNodes[0].style.height) return;
+        return this.setBtnHeigth('');
+      }
+
+      let countBtns = this.$refs.symbols.childNodes[0].childNodes.length + 1;
+      let height = (window.innerHeight - this.$refs.results.offsetHeight)/countBtns + 'px';
+      this.setBtnHeigth(height);
+    },
+    setBtnHeigth(height) {
+      this.$refs.symbols.childNodes.forEach(item => {
+        item.childNodes.forEach(btn => {
+          btn.style.height = height;
+        });
+      });
     }
   },
   mounted() {
+    this.onResize();
     window.addEventListener("keydown", this.keyPress);
+    window.addEventListener("resize", this.onResize);
   }
 }
 </script>
@@ -167,16 +191,16 @@ export default {
   .calculator {
     position: absolute;
     left: calc(50% - 200px);
-    top: calc(50% - 320px);
+    top: calc(50% - 340px);
     width: 400px;
     -webkit-box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
     box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
   }
 
   .action {
-    font-size: 20px;
+    font-size: 25px;
     height: 20px;
-    line-height: 20px;
+    line-height: 30px;
     color: white;
     transition: .3s;
     opacity: 0;
@@ -184,11 +208,11 @@ export default {
   }
 
   .results {
-    height: 100px;
+    height: 140px;
     text-align: end;
     padding: 20px;
-    font-size: 50px;
-    line-height: 120px;
+    font-size: 60px;
+    line-height: 170px;
     color: white;
     background-color: #32303e;
     overflow: hidden;
@@ -205,7 +229,7 @@ export default {
     display: inline-block;
     width: 100px;
     line-height: 100px;
-    font-size: 25px;
+    font-size: 30px;
     color: white;
     background-color: dimgray;
     cursor: pointer;
@@ -223,5 +247,18 @@ export default {
   .backWhite {
     background-color: white !important;
     color: black !important;
+  }
+
+  @media (max-width: 500px) {
+    .calculator {
+      position: unset;
+      left: unset;
+      top: unset;
+      width: unset;
+    }
+
+    .row div {
+      width: 25%;
+    }
   }
 </style>
