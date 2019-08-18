@@ -236,7 +236,7 @@ export default {
     color: white;
     background-color: dimgray;
     cursor: pointer;
-    transition: .2s;
+    transition: opacity .2s;
   }
 
   .row div:hover {
