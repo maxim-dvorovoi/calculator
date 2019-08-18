@@ -144,10 +144,29 @@ export default {
       let action = e.key === 'Enter' ? '=' : e.key;
       if (!isNaN(+action) || action === '.') this.setNumber(action);
       if (this.actionMap.indexOf(action) !== -1) this.setAction(action);
+    },
+    onResize() {
+      if (window.innerWidth > 500) {
+        if (!this.$refs.symbols.childNodes[0].childNodes[0].style.height) return;
+        return this.setBtnHeight('');
+      }
+      let countBtns = this.$refs.symbols.childNodes[0].childNodes.length + 1;
+      let height = (window.innerHeight - this.$refs.results.offsetHeight)/countBtns + 'px';
+      this.setBtnHeight(height);
+    },
+    setBtnHeight(height) {
+      this.$refs.symbols.childNodes.forEach(item => {
+        item.childNodes.forEach(btn => {
+          btn.style.height = height;
+          btn.style.lineHeight = height;
+        });
+      });
     }
   },
   mounted() {
+    this.onResize();
     window.addEventListener("keydown", this.keyPress);
+    window.addEventListener("resize", this.onResize);
   }
 }
 </script>
