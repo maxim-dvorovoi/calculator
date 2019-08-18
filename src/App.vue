@@ -153,6 +153,10 @@ export default {
 </script>
 
 <style>
+  * {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  }
+
   html {
     background: #383838;
     -webkit-tap-highlight-color: transparent;
@@ -163,11 +167,9 @@ export default {
   }
 
   #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
   }
 
   .calculator {
