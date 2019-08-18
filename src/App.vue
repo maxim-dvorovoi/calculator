@@ -7,11 +7,11 @@
         </div>
         {{ enter }}
       </div>
-      <div class="symbols" ref="symbols">
+      <div class="symbols noselect" ref="symbols">
         <div class="row">
-          <div @click="setCurrentAction('√')">√</div>
-          <div @click="setCurrentAction('+/-')">+/-</div>
-          <div @click="setCurrentAction('%')">%</div>
+          <div @click="setCurrentAction('√')" class="backGray">√</div>
+          <div @click="setCurrentAction('+/-')" class="backGray">+/-</div>
+          <div @click="setCurrentAction('%')" class="backGray">%</div>
           <div @click="setAction('/')" class="backWhite">/</div>
         </div>
         <div class="row">
@@ -159,6 +159,7 @@ export default {
       this.$refs.symbols.childNodes.forEach(item => {
         item.childNodes.forEach(btn => {
           btn.style.height = height;
+          btn.style.lineHeight = height;
         });
       });
     }
@@ -173,7 +174,8 @@ export default {
 
 <style>
   html {
-    background: #fff url("./assets/texture.png");
+    background: #383838;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -193,12 +195,12 @@ export default {
     left: calc(50% - 200px);
     top: calc(50% - 340px);
     width: 400px;
-    -webkit-box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
-    box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
+    -webkit-box-shadow: 0 24px 38px 3px rgba(0,0,0,0.5), 0 9px 46px 8px rgba(0,0,0,0.2), 0 11px 15px -7px rgba(0,0,0,0.2);
+    box-shadow: 0 24px 38px 3px rgba(0,0,0,0.5), 0 9px 46px 8px rgba(0,0,0,0.2), 0 11px 15px -7px rgba(0,0,0,0.2);
   }
 
   .action {
-    font-size: 25px;
+    font-size: 30px;
     height: 20px;
     line-height: 30px;
     color: white;
@@ -211,10 +213,10 @@ export default {
     height: 140px;
     text-align: end;
     padding: 20px;
-    font-size: 60px;
+    font-size: 65px;
     line-height: 170px;
     color: white;
-    background-color: #32303e;
+    background-color: #191919;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -229,7 +231,7 @@ export default {
     display: inline-block;
     width: 100px;
     line-height: 100px;
-    font-size: 30px;
+    font-size: 35px;
     color: white;
     background-color: dimgray;
     cursor: pointer;
@@ -244,12 +246,34 @@ export default {
     background-color: orange !important;
   }
 
+  .backGray {
+    background-color: #4a4a4a !important;
+  }
+
   .backWhite {
     background-color: white !important;
     color: black !important;
   }
 
+  .noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
   @media (max-width: 500px) {
+    .results {
+      height: 25vh;
+      line-height: 35vh;
+    }
+
+    .action {
+      line-height: 10vh;
+    }
+
     .calculator {
       position: unset;
       left: unset;
@@ -259,6 +283,14 @@ export default {
 
     .row div {
       width: 25%;
+    }
+
+    .row div:hover {
+      opacity: 1;
+    }
+
+    .row div:active {
+      opacity: 0.8;
     }
   }
 </style>
