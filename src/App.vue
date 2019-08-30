@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div class="calculator">
-      <div class="results" ref="results">
-        <div :class="'action ' + (expression ? 'show' : '')">
+      <div class="results" ref="results" :style="enterSize">
+        <div :class="'action ' + (expression ? 'show' : '')" :style="actionSize">
           {{ expression }}
         </div>
         {{ enter }}
@@ -52,7 +52,8 @@ export default {
       number2: 0,
       result: 0,
       oldAction: null,
-      actionMap: ['/', '*', '-', '+', '=']
+      actionMap: ['/', '*', '-', '+', '='],
+	  numbersMap: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']
     };
   },
   computed: {
@@ -66,6 +67,17 @@ export default {
       res = lastSymbol === '.' || lastSymbol === '0' ? res : this.round(res);
 
       return res;
+    },
+    enterSize() {
+	  if (this.enter > 999999999) {
+		  console.log(this.enter.length);
+	  }
+	},
+    actionSize() {
+	  if (this.expression > 999999999) {
+		console.log(this.expression.length);
+	  }
+	  //console.log(this.expression.length);
     }
   },
   methods: {
@@ -73,6 +85,12 @@ export default {
       return Math.round(exp*10000000)/10000000;
     },
     async setAction(action) {
+	  if (this.number1 === Infinity || this.number2 === Infinity) {
+		  this.result = this.number1;
+		  this.oldAction = null;
+		  return;
+	  }
+
       if (this.number2) {
         await this.setMathAction(this.oldAction);
       } else if (this.number1 && ((this.oldAction === action) || action === '=')) {
@@ -142,7 +160,8 @@ export default {
     },
     keyPress(e) {
       let action = e.key === 'Enter' ? '=' : e.key;
-      if (!isNaN(+action) || action === '.') this.setNumber(action);
+
+      if (this.numbersMap.indexOf(action) !== -1) this.setNumber(action);
       if (this.actionMap.indexOf(action) !== -1) this.setAction(action);
     },
     onResize() {
