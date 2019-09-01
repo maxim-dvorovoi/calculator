@@ -70,16 +70,20 @@ export default {
     },
     enterSize() {
       let style = {};
-	  if (this.enter.toString().length > 9) style.fontSize = '45px';
-      if (this.enter.toString().length > 13) style.fontSize = '35px';
-      if (this.enter.toString().length > 18) style.fontSize = '30px';
-      if (this.enter.toString().length > 21) style.fontSize = '25px';
+      let length = this.enter.toString().length;
+
+	  if (length > 9) style.fontSize = '45px';
+      if (length > 13) style.fontSize = '35px';
+      if (length > 18) style.fontSize = '30px';
+      if (length > 21) style.fontSize = '25px';
 
       return style;
 	},
     actionSize() {
       let style = {};
-      if (this.expression.toString().length > 20) style.fontSize = '22px';
+      let length = this.expression.toString().length;
+
+      if (length > 20) style.fontSize = '22px';
 
       return style;
     }
