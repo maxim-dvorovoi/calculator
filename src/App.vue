@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     expression() {
-      if (!this.oldAction) return;
+      if (!this.oldAction) return '';
       return this.round(this.number1) + ' ' + this.oldAction;
     },
     enter() {
@@ -69,15 +69,19 @@ export default {
       return res;
     },
     enterSize() {
-	  if (this.enter > 999999999) {
-		  console.log(this.enter.length);
-	  }
+      let style = {};
+	  if (this.enter.toString().length > 9) style.fontSize = '45px';
+      if (this.enter.toString().length > 13) style.fontSize = '35px';
+      if (this.enter.toString().length > 18) style.fontSize = '30px';
+      if (this.enter.toString().length > 21) style.fontSize = '25px';
+
+      return style;
 	},
     actionSize() {
-	  if (this.expression > 999999999) {
-		console.log(this.expression.length);
-	  }
-	  //console.log(this.expression.length);
+      let style = {};
+      if (this.expression.toString().length > 20) style.fontSize = '22px';
+
+      return style;
     }
   },
   methods: {
@@ -86,9 +90,7 @@ export default {
     },
     async setAction(action) {
 	  if (this.number1 === Infinity || this.number2 === Infinity) {
-		  this.result = this.number1;
-		  this.oldAction = null;
-		  return;
+		  return this.reset();
 	  }
 
       if (this.number2) {
@@ -123,7 +125,7 @@ export default {
       this.result = 0;
       let variable = 'number' + (this.oldAction ? 2 : 1);
 
-      if (this[variable].length > 8) return;
+      if (this[variable].length > 12) return;
       if (isDot && this.isHasDot(this[variable])) return;
       if (this[variable] === '0' && num === '0') return;
       if (this[variable] == 0 && !isDot && !this.isHasDot(this[variable])) {
@@ -159,6 +161,7 @@ export default {
       }
     },
     keyPress(e) {
+      if (!e || !e.key) return;
       let action = e.key === 'Enter' ? '=' : e.key;
 
       if (this.numbersMap.indexOf(action) !== -1) this.setNumber(action);
