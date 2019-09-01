@@ -69,23 +69,25 @@ export default {
       return res;
     },
     enterSize() {
-      let style = {};
+      let size = (window.innerWidth < 365) ? 54 : 65;
       let length = this.enter.toString().length;
 
-	  if (length > 9) style.fontSize = '45px';
-      if (length > 13) style.fontSize = '35px';
-      if (length > 18) style.fontSize = '30px';
-      if (length > 21) style.fontSize = '25px';
+	  if (length > 9) size = 45;
+      if (length > 13) size = 33;
+      if (length > 18) size = 28;
+      if (length > 21) size = 25;
+      if (window.innerWidth < 365) size -= 4;
 
-      return style;
+      return {'font-size': size+'px'};
 	},
     actionSize() {
-      let style = {};
+      let size = 30;
       let length = this.expression.toString().length;
 
-      if (length > 20) style.fontSize = '22px';
+      if (length > 20) size = 22;
+      if (window.innerWidth < 365) size -= 4;
 
-      return style;
+      return {'font-size': size+'px'};
     }
   },
   methods: {
@@ -325,10 +327,6 @@ export default {
   }
 
   @media (max-width: 365px) {
-    .results {
-      font-size: 55px;
-    }
-
     .row div {
       font-size: 30px;
     }
